@@ -30,6 +30,7 @@ pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
     #[account(
+        mut,
         seeds = [
             payer.key.as_ref(),
             b"user",
@@ -38,8 +39,10 @@ pub struct Withdraw<'info> {
     )]
     pub authority: Account<'info, UserAccount>,
 
+    #[account(mut)]
     pub from: Account<'info, TokenAccount>,
 
+    #[account(mut)]
     pub to: Account<'info, TokenAccount>,
 
     #[account(mut)]

@@ -23,6 +23,7 @@ pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
 #[derive(Accounts)]
 pub struct Deposit<'info> {
     #[account(
+        mut,
         seeds = [
             authority.key.as_ref(),
             b"user",
@@ -31,8 +32,10 @@ pub struct Deposit<'info> {
     )]
     pub user_account: Account<'info, UserAccount>,
 
+    #[account(mut)]
     pub from: Account<'info, TokenAccount>,
 
+    #[account(mut)]
     pub to: Account<'info, TokenAccount>,
 
     #[account(mut)]
