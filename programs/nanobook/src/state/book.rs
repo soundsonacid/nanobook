@@ -91,3 +91,12 @@ pub struct OrderQueue {
     pub orders: [Order; ORDER_BOOK_DEPTH as usize],
     pub free_bitmap: FreeBitmap,
 }
+
+#[derive(Default)]
+#[account]
+pub struct UserAccount {
+    pub owner: Pubkey,
+    pub nano_balance: u64,
+    pub sol_balance: u64,
+    pub bump: u8,
+}
