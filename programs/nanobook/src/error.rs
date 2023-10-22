@@ -6,4 +6,8 @@ pub enum ErrorCode {
     MaxOrdersReached,
     #[msg("Invalid order cancellation")]
     CouldNotCancel,
+    #[msg("Could not fill order")]
+    CouldNotFill,
+    #[msg("Could not find order")]
+    CouldNotFind,
 }

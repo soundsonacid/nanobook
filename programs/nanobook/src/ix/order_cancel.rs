@@ -14,8 +14,8 @@ pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
     book.num_orders -= 1;
 
     match order.side {
-        Side::Buy => book.remove_buy_order(order.id),
-        Side::Sell => book.remove_sell_order(order.id),
+        Side::Buy => book.buy_queue.remove_order(order.id),
+        Side::Sell => book.sell_queue.remove_order(order.id),
     };
     
     Ok(())

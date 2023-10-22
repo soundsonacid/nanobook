@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{Order, Orderbook, Side},
+    state::{Order, Orderbook, Side, MatchingEngine},
 };
 
-pub fn process_place_order(ctx: Context<PlaceOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
+pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
     let order = &mut ctx.accounts.order;
 
@@ -21,17 +21,20 @@ pub fn process_place_order(ctx: Context<PlaceOrder>, price: u64, quantity: u64, 
     order.side = side;
 
     match side {
-        Side::Buy => book.add_buy_order(**order),
-        Side::Sell => book.add_sell_order(**order),
+        Side::Buy => book.buy_queue.add_order(**order),
+        Side::Sell => book.sell_queue.add_order(**order),
     };
 
     book.num_orders += 1;
+    
+    let mut matching_engine = MatchingEngine::new(book);
+    matching_engine.match_limit_order(&order)?;
 
     Ok(())
 }
 
 #[derive(Accounts)]
-pub struct PlaceOrder<'info> {
+pub struct PlaceLimitOrder<'info> {
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
     

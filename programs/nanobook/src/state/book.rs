@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
 use bytemuck::{Zeroable, Pod};
-use crate::constants::ORDER_BOOK_DEPTH;
+use crate::{
+    state::FreeBitmap,
+    constants::ORDER_BOOK_DEPTH,
+    error::ErrorCode,
+};
 
-use super::FreeBitmap;
 
 #[derive(Default, AnchorSerialize, AnchorDeserialize, Copy, Clone)]
 #[repr(u8)]
@@ -28,45 +31,7 @@ pub struct Orderbook {
 }
 
 impl Orderbook {
-    pub fn add_buy_order(&mut self, order: Order) -> Option<u8> {
-        if let Some(slot) = self.buy_queue.free_bitmap.find_first_zero() {
-            self.buy_queue.orders[slot as usize] = order;
-            self.buy_queue.free_bitmap.set(slot);
 
-            return Some(slot)
-        }
-
-        None
-    }
-
-    pub fn add_sell_order(&mut self, order: Order) -> Option<u8> {
-        if let Some(slot) = self.sell_queue.free_bitmap.find_first_zero() {
-            self.sell_queue.orders[slot as usize] = order;
-            self.sell_queue.free_bitmap.set(slot);
-
-            return Some(slot)
-        }
-
-        None
-    }
-
-    pub fn remove_buy_order(&mut self, order_id: u64) {
-        if let Some(slot) = self.buy_queue.orders.iter().enumerate()
-            .find(|&(_, o)| o.id == order_id)
-            .map(|(s, _)| s) {
-                self.buy_queue.orders[slot] = Order::default();
-                self.buy_queue.free_bitmap.clear(slot as u8);
-            }
-    }
-
-    pub fn remove_sell_order(&mut self, order_id: u64) {
-        if let Some(slot) = self.sell_queue.orders.iter().enumerate()
-            .find(|&(_, o)| o.id == order_id)
-            .map(|(s, _)| s) {
-                self.sell_queue.orders[slot] = Order::default();
-                self.sell_queue.free_bitmap.clear(slot as u8);
-            }
-    }
 }
 
 #[derive(Default, Copy, Zeroable, Pod)]
@@ -78,7 +43,7 @@ pub struct Order {
     pub price: u64,
     pub quantity: u64,
     pub side: Side,
-    _padding: [u8; 7],
+    pub _padding: [u8; 7],
 }
 
 #[account(zero_copy)]
@@ -90,5 +55,43 @@ pub struct OrderQueue {
     _padding3: [u8; 21], 
     pub orders: [Order; ORDER_BOOK_DEPTH as usize],
     pub free_bitmap: FreeBitmap,
+}
+
+impl OrderQueue {
+    pub fn add_order(&mut self, order: Order) -> Option<u8> {
+        if let Some(slot) = self.free_bitmap.find_first_zero() {
+            self.orders[slot as usize] = order;
+            self.free_bitmap.set(slot);
+
+            return Some(slot)
+        }
+
+        None
+    }
+
+    pub fn remove_order(&mut self, order_id: u64) {
+        if let Some(slot) = self.orders.iter().enumerate()
+            .find(|&(_, o)| o.id == order_id)
+            .map(|(s, _)| s) {
+                self.orders[slot] = Order::default();
+                self.free_bitmap.clear(slot as u8);
+            }
+    }
+
+    pub fn get_best_quote(&self) -> Option<&Order> {
+        self.orders
+            .iter()
+            .filter(|&order| order.id != 0) // filter out Order::default()
+            .max_by_key(|order| order.price)
+    }
+
+    pub fn update_order_quantity(&mut self, order_id: u64, new_quantity: u64) -> Result<()> {
+        if let Some(order) = self.orders.iter_mut().find(|o| o.id == order_id) {
+            order.quantity = new_quantity;
+            Ok(())
+        } else {
+            Err(ErrorCode::CouldNotFind.into())
+        }
+    }
 }
 

@@ -29,8 +29,8 @@ pub mod nanobook {
         user_withdraw::process_withdrawal(ctx, amt)
     }
 
-    pub fn place_order(ctx: Context<PlaceOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
-        order_place::process_place_order(ctx, price, quantity, side)
+    pub fn place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
+        order_place_limit::process_place_limit_order(ctx, price, quantity, side)
     }
 
     pub fn cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
