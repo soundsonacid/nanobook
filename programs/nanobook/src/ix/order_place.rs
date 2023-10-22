@@ -12,7 +12,6 @@ pub fn process_place_order(ctx: Context<PlaceOrder>, price: u64, quantity: u64, 
         return Err(ErrorCode::MaxOrdersReached.into());
     }
 
-    book.num_orders += 1;
     book.last_order_id += 1;
 
     order.id = book.last_order_id;
@@ -20,6 +19,13 @@ pub fn process_place_order(ctx: Context<PlaceOrder>, price: u64, quantity: u64, 
     order.price = price;
     order.quantity = quantity;
     order.side = side;
+
+    match side {
+        Side::Buy => book.add_buy_order(**order),
+        Side::Sell => book.add_sell_order(**order),
+    };
+
+    book.num_orders += 1;
 
     Ok(())
 }

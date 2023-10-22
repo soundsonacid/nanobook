@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{Order, Orderbook},
+    state::{Order, Orderbook, Side},
 };
 
 pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
@@ -12,6 +12,12 @@ pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
 
     order.close(ctx.accounts.payer.to_account_info())?;
     book.num_orders -= 1;
+
+    match order.side {
+        Side::Buy => book.remove_buy_order(order.id),
+        Side::Sell => book.remove_sell_order(order.id),
+    };
+    
     Ok(())
 }
 
