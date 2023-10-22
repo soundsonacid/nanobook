@@ -6,7 +6,7 @@ use crate::{state::UserAccount, token_utils::token_transfer};
 
 pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
 
-    token_transfer(amt, &ctx.accounts.token_program, &ctx.accounts.from, &ctx.accounts.to, &ctx.accounts.payer)?;
+    token_transfer(amt, &ctx.accounts.token_program, &ctx.accounts.from, &ctx.accounts.to, &ctx.accounts.authority)?;
 
     Ok(())
 }
@@ -15,7 +15,7 @@ pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
 pub struct Deposit<'info> {
     #[account(
         seeds = [
-            payer.key.as_ref(),
+            authority.key.as_ref(),
             b"user",
         ],
         bump
@@ -27,7 +27,7 @@ pub struct Deposit<'info> {
     pub to: Account<'info, TokenAccount>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
 
