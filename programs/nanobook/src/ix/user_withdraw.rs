@@ -5,8 +5,6 @@ use crate::{state::{UserAccount, user::Balance}, token_utils::token_transfer_sig
 
 
 pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
-    let user_account = &mut ctx.accounts.authority.clone();
-
     let seeds = &[
         b"user".as_ref(),
         &ctx.accounts.payer.key().to_bytes(),
@@ -16,10 +14,14 @@ pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
 
     token_transfer_signed(amt, &ctx.accounts.token_program, &ctx.accounts.to, &ctx.accounts.from, &ctx.accounts.authority, signer_seeds)?;
 
-    if ctx.accounts.from.mint == native_mint::ID {
-        user_account.decrement_balance(Balance::Sol, amt)
-    } else {
-        user_account.decrement_balance(Balance::Nano, amt)
+    {
+        let user_account = &mut ctx.accounts.authority;
+
+        if ctx.accounts.from.mint == native_mint::ID {
+            user_account.decrement_balance(Balance::Sol, amt)
+        } else {
+            user_account.decrement_balance(Balance::Nano, amt)
+        }
     }
 
     Ok(())

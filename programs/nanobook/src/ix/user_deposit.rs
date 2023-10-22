@@ -5,14 +5,16 @@ use crate::{state::{UserAccount, user::Balance}, token_utils::token_transfer};
 
 
 pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
-    let user_account = &mut ctx.accounts.user_account.clone();
-
     token_transfer(amt, &ctx.accounts.token_program, &ctx.accounts.from, &ctx.accounts.to, &ctx.accounts.authority)?;
 
-    if ctx.accounts.from.mint == native_mint::ID {
-        user_account.decrement_balance(Balance::Sol, amt);
-    } else {
-        user_account.decrement_balance(Balance::Nano, amt);
+    {
+        let user_account = &mut ctx.accounts.user_account;
+
+        if ctx.accounts.from.mint == native_mint::ID {
+            user_account.decrement_balance(Balance::Sol, amt);
+        } else {
+            user_account.decrement_balance(Balance::Nano, amt);
+        }
     }
 
     Ok(())
