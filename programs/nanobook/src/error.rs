@@ -4,4 +4,6 @@ use anchor_lang::prelude::*;
 pub enum ErrorCode {
     #[msg("The maximum number of orders has been reached.")]
     MaxOrdersReached,
+    #[msg("Invalid order cancellation")]
+    CouldNotCancel,
 }
