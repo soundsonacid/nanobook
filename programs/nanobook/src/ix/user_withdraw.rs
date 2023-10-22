@@ -1,10 +1,12 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_spl::token::{spl_token::native_mint, Token, TokenAccount};
 
-use crate::{state::UserAccount, token_utils::token_transfer_signed};
+use crate::{state::{UserAccount, user::Balance}, token_utils::token_transfer_signed};
 
 
 pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
+    let user_account = &mut ctx.accounts.authority.clone();
+
     let seeds = &[
         b"user".as_ref(),
         &ctx.accounts.payer.key().to_bytes(),
@@ -13,6 +15,12 @@ pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
     let signer_seeds = &seeds[..];
 
     token_transfer_signed(amt, &ctx.accounts.token_program, &ctx.accounts.to, &ctx.accounts.from, &ctx.accounts.authority, signer_seeds)?;
+
+    if ctx.accounts.from.mint == native_mint::ID {
+        user_account.decrement_balance(Balance::Sol, amt)
+    } else {
+        user_account.decrement_balance(Balance::Nano, amt)
+    }
 
     Ok(())
 }
