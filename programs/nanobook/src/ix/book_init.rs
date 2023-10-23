@@ -4,8 +4,10 @@ use crate::{state::Orderbook, constants::ORDER_BOOK_DEPTH};
 
 pub fn process_initialize_orderbook(ctx: Context<InitializeOrderbook>) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
+    let bump = ctx.bumps.book;
     book.max_orders = ORDER_BOOK_DEPTH;
     book.num_orders = 0;
+    book.bump = bump;
     Ok(())
 }
 
@@ -14,6 +16,10 @@ pub struct InitializeOrderbook<'info> {
     #[account(
         init,
         payer = payer,
+        seeds = [
+            b"orderbook"
+        ],
+        bump,
         space = std::mem::size_of::<Orderbook>() + 8,
     )]
     pub book: AccountLoader<'info, Orderbook>,

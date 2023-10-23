@@ -14,4 +14,4 @@ order execution is represented by internal account changes and NOT actual token 
 
 therefore, the Orderbook's base_vault and quote_vault only change total balance on deposit and withdrawal
 
-this introduces the potential for overwithdrawal, which we've guarded against by requiring that a user's withdrawal is lte their corresponding balance
+this introduces the potential for overwithdrawal, which i've guarded against by requiring that a user's withdrawal is lte their corresponding balance

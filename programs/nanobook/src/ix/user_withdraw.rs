@@ -1,28 +1,27 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{spl_token::native_mint, Token, TokenAccount};
 
-use crate::{state::{UserAccount, user::Balance}, token_utils::token_transfer_signed, error::ErrorCode};
+use crate::{state::{UserAccount, user::Balance, Orderbook}, token_utils::token_transfer_signed, error::ErrorCode};
 
 
 pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
     let seeds = &[
-        b"user".as_ref(),
-        &ctx.accounts.payer.key().to_bytes(),
-        &[ctx.bumps.authority]
+        b"orderbook".as_ref(),
+        &[ctx.bumps.orderbook]
     ];
     let signer_seeds = &seeds[..];
 
     // Enforce against over-withdrawals
     if ctx.accounts.from.mint == native_mint::ID {
-        require!(ctx.accounts.authority.sol_balance >= amt, ErrorCode::Overdraft);
+        require!(ctx.accounts.user.sol_balance >= amt, ErrorCode::Overdraft);
     } else {
-        require!(ctx.accounts.authority.nano_balance >= amt, ErrorCode::Overdraft);
+        require!(ctx.accounts.user.nano_balance >= amt, ErrorCode::Overdraft);
     }
 
-    token_transfer_signed(amt, &ctx.accounts.token_program, &ctx.accounts.to, &ctx.accounts.from, &ctx.accounts.authority, signer_seeds)?;
+    token_transfer_signed(amt, &ctx.accounts.token_program, &ctx.accounts.to, &ctx.accounts.from, &ctx.accounts.orderbook, signer_seeds)?;
 
     {
-        let user_account = &mut ctx.accounts.authority;
+        let user_account = &mut ctx.accounts.user;
 
         if ctx.accounts.from.mint == native_mint::ID {
             user_account.decrement_balance(&Balance::Sol, amt)
@@ -44,13 +43,22 @@ pub struct Withdraw<'info> {
         ],
         bump
     )]
-    pub authority: Account<'info, UserAccount>,
+    pub user: Account<'info, UserAccount>,
+
+    #[account(
+        mut,
+        seeds = [
+            b"orderbook",
+        ],
+        bump
+    )]
+    pub orderbook: AccountLoader<'info, Orderbook>,
 
     #[account(mut)]
-    pub from: Account<'info, TokenAccount>,
+    pub from: Account<'info, TokenAccount>, // orderbook token account
 
     #[account(mut)]
-    pub to: Account<'info, TokenAccount>,
+    pub to: Account<'info, TokenAccount>, // payer token account
 
     #[account(mut)]
     pub payer: Signer<'info>,

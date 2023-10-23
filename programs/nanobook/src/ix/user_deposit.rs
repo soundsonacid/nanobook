@@ -33,10 +33,10 @@ pub struct Deposit<'info> {
     pub user_account: Account<'info, UserAccount>,
 
     #[account(mut)]
-    pub from: Account<'info, TokenAccount>,
+    pub from: Account<'info, TokenAccount>, // payer token account
 
     #[account(mut)]
-    pub to: Account<'info, TokenAccount>,
+    pub to: Account<'info, TokenAccount>, // orderbook token account
 
     #[account(mut)]
     pub authority: Signer<'info>,

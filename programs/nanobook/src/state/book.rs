@@ -24,10 +24,11 @@ unsafe impl Pod for Side {}
 pub struct Orderbook {
     pub max_orders: u8,
     pub num_orders: u8,
-    _padding: [u8; 6],
+    pub bump: u8,
+    _padding: [u8; 5],
     pub last_order_id: u64,
     pub buy_queue: OrderQueue,
-    pub sell_queue: OrderQueue
+    pub sell_queue: OrderQueue,
 }
 
 impl Orderbook {
