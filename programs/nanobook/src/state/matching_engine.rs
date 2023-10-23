@@ -69,10 +69,8 @@ impl<'a> MatchingEngine<'a> {
                 Side::Buy => self.orderbook.buy_queue.add_order(Order { quantity: remaining_quantity, ..*order }),
                 Side::Sell => self.orderbook.sell_queue.add_order(Order { quantity: remaining_quantity, ..*order }),
             };
-        
-            if add_order_success.is_none() {
-                return Err(ErrorCode::MaxOrdersReached.into());
-            }
+            
+            require!(add_order_success.is_some(), ErrorCode::MaxOrdersReached);
         };
 
         Ok(())
@@ -120,7 +118,7 @@ impl<'a> MatchingEngine<'a> {
                     }
                 } else {
                     // no more quotes to match against - we have to reject the order because it could not be filled
-                    return Err(ErrorCode::CouldNotFill.into());
+                    require!(remaining_quantity < ORDER_DUST_THRESHOLD, ErrorCode::CouldNotFill);
             }
         }
 

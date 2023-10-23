@@ -18,9 +18,7 @@ pub fn process_place_market_order(ctx: Context<PlaceMarketOrder>, quantity: u64,
         Side::Sell => book.sell_queue
     };
 
-    if queue.num_orders >= queue.max_orders {
-        return Err(ErrorCode::MaxOrdersReached.into());
-    }
+    require!(queue.num_orders < queue.max_orders, ErrorCode::MaxOrdersReached);
 
     book.last_order_id += 1;
 
