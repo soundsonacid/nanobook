@@ -3,6 +3,7 @@ use std::cmp::min;
 use crate::{state::{UserAccount, Order, Orderbook, Side}, constants::ORDER_DUST_THRESHOLD, error::ErrorCode};
 
 #[derive(BorshSerialize, BorshDeserialize)]
+#[repr(u8)]
 pub enum Market {
     SolNano,
     NanoSol,
