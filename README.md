@@ -4,7 +4,7 @@ this is the second project in my budding series of ultra-minimal barebones block
 
 it is a 100% on-chain CLOB that will be as small as i could possibly make it to still resemble what a CLOB is supposed to do
 
-currently, nanobook runs 812 lines of rust with comments & whitespace - as of 10/22/23 this is before i've written tests for it to make sure everything works as expected
+currently, nanobook runs 834 lines of rust with comments & whitespace - as of 10/22/23 this is before i've written tests for it to make sure everything works as expected
 
 nanobook Orderbooks only supports markets where SOL is either the base or the quote (SOL/ANY & ANY/SOL) 
 
