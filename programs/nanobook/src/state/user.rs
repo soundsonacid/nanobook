@@ -18,14 +18,14 @@ pub struct UserAccount {
 }
 
 impl UserAccount {
-    pub fn increment_balance(&mut self, balance: Balance, delta: u64) {
+    pub fn increment_balance(&mut self, balance: &Balance, delta: u64) {
         match balance {
             Balance::Nano => self.nano_balance += delta,
             Balance::Sol => self.sol_balance += delta,
         };
     }
 
-    pub fn decrement_balance(&mut self, balance: Balance, delta: u64) {
+    pub fn decrement_balance(&mut self, balance: &Balance, delta: u64) {
         match balance {
             Balance::Nano => self.nano_balance -= delta,
             Balance::Sol => self.sol_balance -= delta,

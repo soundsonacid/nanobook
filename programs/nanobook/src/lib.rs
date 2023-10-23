@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use ix::*;
-use state::Side;
+use state::{Market, Side}
+;
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 pub mod ix;
@@ -29,8 +30,12 @@ pub mod nanobook {
         user_withdraw::process_withdrawal(ctx, amt)
     }
 
-    pub fn place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
-        order_place_limit::process_place_limit_order(ctx, price, quantity, side)
+    pub fn place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side, market: Market) -> Result<()> {
+        order_place_limit::process_place_limit_order(ctx, price, quantity, side, market)
+    }
+
+    pub fn place_market_order(ctx: Context<PlaceMarketOrder>, quantity: u64, side: Side, market: Market) -> Result<()> {
+        order_place_market::process_place_market_order(ctx, quantity, side, market)
     }
 
     pub fn cancel_order(ctx: Context<CancelOrder>) -> Result<()> {

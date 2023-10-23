@@ -78,10 +78,10 @@ impl OrderQueue {
             }
     }
 
-    pub fn get_best_quote(&self) -> Option<&Order> {
+    pub fn get_best_quote(&mut self) -> Option<&mut Order> {
         self.orders
-            .iter()
-            .filter(|&order| order.id != 0) // filter out Order::default()
+            .iter_mut()
+            .filter(|order| order.id != 0) // filter out Order::default()
             .max_by_key(|order| order.price)
     }
 

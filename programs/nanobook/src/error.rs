@@ -10,4 +10,6 @@ pub enum ErrorCode {
     CouldNotFill,
     #[msg("Could not find order")]
     CouldNotFind,
+    #[msg("Attempted to withdraw more than balance")]
+    Overdraft,
 }

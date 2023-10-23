@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{UserAccount, Order, Orderbook, Side, MatchingEngine},
+    state::{UserAccount, Order, Orderbook, Side, MatchingEngine, Market},
 };
 
-pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
+pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side, market: Market) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
     let order = &mut ctx.accounts.order;
 
@@ -28,7 +28,7 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
     book.num_orders += 1;
     
     let mut matching_engine = MatchingEngine::new(book);
-    matching_engine.match_limit_order(&order)?;
+    matching_engine.match_limit_order(&order, &mut *ctx.accounts.placer, &market)?;
 
     Ok(())
 }

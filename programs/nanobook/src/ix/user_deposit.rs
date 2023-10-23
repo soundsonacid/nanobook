@@ -11,9 +11,9 @@ pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
         let user_account = &mut ctx.accounts.user_account;
 
         if ctx.accounts.from.mint == native_mint::ID {
-            user_account.decrement_balance(Balance::Sol, amt);
+            user_account.decrement_balance(&Balance::Sol, amt);
         } else {
-            user_account.decrement_balance(Balance::Nano, amt);
+            user_account.decrement_balance(&Balance::Nano, amt);
         }
     }
 
