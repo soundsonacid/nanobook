@@ -12,7 +12,7 @@ pub struct InitializeOrderbook<'info> {
         init,
         payer = payer,
         seeds = [
-            b"orderbook"
+            b"ob"
         ],
         bump,
         space = 10240, 

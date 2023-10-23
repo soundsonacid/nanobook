@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use crate::{state::Orderbook, constants::ORDER_BOOK_DEPTH};
 
 pub fn process_hydrate(ctx: Context<HydrateOrderbook>) -> Result<()> {
-    let book = &mut ctx.accounts.book.load_mut()?;
+    let mut book = ctx.accounts.book.load_mut()?;
     let bump = ctx.bumps.book;
     book.buy_queue.max_orders = ORDER_BOOK_DEPTH;
     book.sell_queue.max_orders = ORDER_BOOK_DEPTH;
@@ -13,12 +13,11 @@ pub fn process_hydrate(ctx: Context<HydrateOrderbook>) -> Result<()> {
 }
 
 #[derive(Accounts)]
-#[instruction()]
 pub struct HydrateOrderbook<'info> {
     #[account(
         mut,
         seeds = [
-            b"orderbook",
+            b"ob",
         ],
         bump,
     )]

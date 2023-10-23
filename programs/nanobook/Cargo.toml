@@ -19,3 +19,4 @@ default = []
 anchor-lang = "0.29.0"
 anchor-spl = "0.29.0"
 bytemuck = "1.14.0"
+static_assertions = "1.1.0"

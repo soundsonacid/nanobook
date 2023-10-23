@@ -6,7 +6,7 @@ use crate::{state::{UserMap, user::Balance, Orderbook}, token_utils::token_trans
 
 pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
     let seeds = &[
-        b"orderbook".as_ref(),
+        b"book".as_ref(),
         &[ctx.bumps.orderbook]
     ];
     let signer_seeds = &seeds[..];
@@ -51,7 +51,7 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         seeds = [
-            b"orderbook",
+            b"book",
         ],
         bump
     )]

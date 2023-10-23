@@ -6,7 +6,6 @@ use crate::{
     error::ErrorCode,
 };
 
-
 #[derive(Default, AnchorSerialize, AnchorDeserialize, Copy, Clone)]
 #[repr(u8)]
 pub enum Side {
@@ -21,7 +20,7 @@ unsafe impl Pod for Side {}
 
 #[account(zero_copy)]
 #[repr(C)]
-pub struct Orderbook {
+pub struct Orderbook { // size 20640 + 8
     pub bump: u8,
     _padding: [u8; 7],
     pub last_order_id: u64,
