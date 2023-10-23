@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{Order, Orderbook, Side, MatchingEngine},
+    state::{UserAccount, Order, Orderbook, Side, MatchingEngine},
 };
 
 pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side) -> Result<()> {
@@ -15,7 +15,7 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
     book.last_order_id += 1;
 
     order.id = book.last_order_id;
-    order.placer = ctx.accounts.payer.key();
+    order.placer = *ctx.accounts.placer;
     order.price = price;
     order.quantity = quantity;
     order.side = side;
@@ -35,6 +35,15 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
 
 #[derive(Accounts)]
 pub struct PlaceLimitOrder<'info> {
+    #[account(
+        seeds = [
+            payer.key.as_ref(),
+            b"user",
+        ],
+        bump
+    )]
+    pub placer: Account<'info, UserAccount>,
+
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
     

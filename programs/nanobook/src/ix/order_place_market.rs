@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{Order, Orderbook, Side, MatchingEngine},
+    state::{Order, Orderbook, Side, MatchingEngine, UserAccount},
 };
 
 pub fn process_place_market_order(ctx: Context<PlaceMarketOrder>, quantity: u64, side: Side) -> Result<()> {
@@ -15,7 +15,7 @@ pub fn process_place_market_order(ctx: Context<PlaceMarketOrder>, quantity: u64,
     book.last_order_id += 1;
 
     order.id = book.last_order_id;
-    order.placer = ctx.accounts.payer.key();
+    order.placer = *ctx.accounts.placer;
     order.price = 0; 
     order.quantity = quantity;
     order.side = side;
@@ -35,6 +35,15 @@ pub fn process_place_market_order(ctx: Context<PlaceMarketOrder>, quantity: u64,
 
 #[derive(Accounts)]
 pub struct PlaceMarketOrder<'info> {
+    #[account(
+        seeds = [
+            payer.key.as_ref(),
+            b"user",
+        ],
+        bump
+    )]
+    pub placer: Account<'info, UserAccount>,
+
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
     

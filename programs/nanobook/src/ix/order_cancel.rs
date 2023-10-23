@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{Order, Orderbook, Side},
+    state::{UserAccount, Order, Orderbook, Side},
 };
 
 pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
     let order = &mut ctx.accounts.order;
     let book = &mut ctx.accounts.book.load_mut()?;
 
-    require!(order.placer == ctx.accounts.payer.key(), ErrorCode::CouldNotCancel);
+    require!(order.placer == *ctx.accounts.placer, ErrorCode::CouldNotCancel);
 
     order.close(ctx.accounts.payer.to_account_info())?;
     book.num_orders -= 1;
@@ -23,6 +23,15 @@ pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct CancelOrder<'info> {
+    #[account(
+        seeds = [
+            payer.key.as_ref(),
+            b"user",
+        ],
+        bump
+    )]
+    pub placer: Account<'info, UserAccount>,
+
     #[account(mut)]
     pub order: Account<'info, Order>,
 

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use bytemuck::{Zeroable, Pod};
 use crate::{
-    state::FreeBitmap,
+    state::{FreeBitmap, UserAccount},
     constants::ORDER_BOOK_DEPTH,
     error::ErrorCode,
 };
@@ -39,7 +39,7 @@ impl Orderbook {
 #[repr(C)]
 pub struct Order {
     pub id: u64,
-    pub placer: Pubkey,
+    pub placer: UserAccount,
     pub price: u64,
     pub quantity: u64,
     pub side: Side,
