@@ -6,7 +6,7 @@ it is a 100% on-chain CLOB that will be as small as i could possibly make it to 
 
 currently, nanobook runs 812 lines of rust with comments & whitespace - as of 10/22/23 this is before i've written tests for it to make sure everything works as expected
 
-nanobook only supports two markets total - SOL/ANY and ANY/SOL 
+nanobook Orderbooks only supports markets where SOL is either the base or the quote (SOL/ANY & ANY/SOL) 
 
 because i am writing tests for this with a token i decided to call "NANO", the markets & balances are denoted with Nano in several places for clarity
 
