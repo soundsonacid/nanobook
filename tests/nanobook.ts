@@ -25,21 +25,51 @@ describe("nanobook", () => {
     const ORDERBOOK_NANO = await getAssociatedTokenAddress(NANO_MINT, ORDERBOOK, true);
     const ORDERBOOK_WSOL = await getAssociatedTokenAddress(WSOL_MINT, ORDERBOOK, true);
 
-    await program.methods.initializeOrderbook()
-      .accounts({
-        book: ORDERBOOK,
-        nanoMint: NANO_MINT,
-        nanoVault: ORDERBOOK_NANO,
-        solMint: WSOL_MINT,
-        solVault: ORDERBOOK_WSOL,
-        payer: program.provider.publicKey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-      })
-      .rpc()
-      .then((sig) => console.log(`Successfully initialized orderbook: ${sig}`))
-      .catch((err) => console.log(`Failed to initialize orderbook: ${err}`));
+    // await program.methods.initializeOrderbook()
+    //   .accounts({
+    //     book: ORDERBOOK,
+    //     nanoMint: NANO_MINT,
+    //     nanoVault: ORDERBOOK_NANO,
+    //     solMint: WSOL_MINT,
+    //     solVault: ORDERBOOK_WSOL,
+    //     payer: program.provider.publicKey,
+    //     systemProgram: SystemProgram.programId,
+    //     tokenProgram: TOKEN_PROGRAM_ID,
+    //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+    //   })
+    //   .rpc()
+    //   .then((sig) => console.log(`Successfully initialized orderbook: ${sig}`))
+    //   .catch((err) => console.log(`Failed to initialize orderbook: ${err}`));
+
+    // await program.methods.reallocOrderbook(10240)
+    //   .accounts({
+    //     book: ORDERBOOK,
+    //     payer: program.provider.publicKey,
+    //     systemProgram: SystemProgram.programId,
+    //   })
+    //   .rpc()
+    //   .then((sig) => console.log(`Successfully reallocated orderbook: ${sig}`))
+    //   .catch((err) => console.log(`Failed to reallocated orderbook: ${err}`));
+
+    await program.methods.reallocOrderbook(8)
+        .accounts({
+          book: ORDERBOOK,
+          payer: program.provider.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc()
+        .then((sig) => console.log(`Successfully reallocated orderbook: ${sig}`))
+        .catch((err) => console.log(`Failed to reallocated orderbook: ${err}`));
+
+    await program.methods.hydrateOrderbook()
+        .accounts({
+          book: ORDERBOOK,
+          payer: program.provider.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc()
+        .then((sig) => console.log(`Successfully hydrated orderbook: ${sig}`))
+        .catch((err) => console.log(`Failed to hydrate orderbook: ${err}`));
   });
 
   it.skip("Initializes UserMap!", async () => {

@@ -27,9 +27,6 @@ pub struct CancelOrder<'info> {
     )]
     pub usermap: AccountLoader<'info, UserMap>,
 
-    // #[account(mut)]
-    // pub order: Account<'info, Order>,
-
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
 

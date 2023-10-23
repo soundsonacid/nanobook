@@ -50,13 +50,6 @@ pub struct PlaceLimitOrder<'info> {
 
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
-    
-    // #[account(
-    //     init,
-    //     payer = payer,
-    //     space = std::mem::size_of::<Order>() + 8,
-    // )]
-    // pub order: Account<'info, Order>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

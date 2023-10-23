@@ -1,15 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, token::{TokenAccount, Mint, Token}};
-use crate::{state::Orderbook, constants::ORDER_BOOK_DEPTH};
+use crate::state::Orderbook;
 
-pub fn process_initialize_orderbook(ctx: Context<InitializeOrderbook>) -> Result<()> {
-    let book = &mut ctx.accounts.book.load_init()?;
-    let bump = ctx.bumps.book;
-    book.buy_queue.max_orders = ORDER_BOOK_DEPTH;
-    book.sell_queue.max_orders = ORDER_BOOK_DEPTH;
-    book.buy_queue.num_orders = 0;
-    book.sell_queue.num_orders = 0;
-    book.bump = bump;
+pub fn process_initialize_orderbook(_ctx: Context<InitializeOrderbook>) -> Result<()> {
     Ok(())
 }
 
@@ -22,7 +15,7 @@ pub struct InitializeOrderbook<'info> {
             b"orderbook"
         ],
         bump,
-        space = 165120 + 8,
+        space = 10240, 
     )]
     pub book: AccountLoader<'info, Orderbook>,
 

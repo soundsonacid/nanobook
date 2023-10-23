@@ -18,6 +18,14 @@ pub mod nanobook {
         book_init::process_initialize_orderbook(ctx)
     }
 
+    pub fn realloc_orderbook(ctx: Context<ReallocOrderbook>, len: u16) -> Result<()> {
+        book_realloc::process_realloc(ctx, len)
+    }
+
+    pub fn hydrate_orderbook(ctx: Context<HydrateOrderbook>) -> Result<()> {
+        book_hydrate::process_hydrate(ctx)
+    }
+
     pub fn initialize_usermap(ctx: Context<InitializeUserMap>) -> Result<()> {
         usermap_init::process_initialize_usermap(ctx)
     }
