@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use bytemuck::{Zeroable, Pod};
+use bytemuck::{Zeroable, Pod, ZeroableInOption, PodInOption};
 use crate::{
     state::{FreeBitmap, UserAccount},
     constants::ORDER_BOOK_DEPTH,
@@ -29,12 +29,7 @@ pub struct Orderbook {
     pub sell_queue: OrderQueue,
 }
 
-impl Orderbook {
-
-}
-
-#[derive(Default, Copy, Zeroable, Pod)]
-#[account]
+#[derive(Default, Copy, Clone,  Zeroable, Pod, AnchorSerialize, AnchorDeserialize)]
 #[repr(C)]
 pub struct Order {
     pub id: u64,
@@ -45,7 +40,17 @@ pub struct Order {
     pub _padding: [u8; 7],
 }
 
-#[account(zero_copy)]
+unsafe impl ZeroableInOption for Order {}
+
+unsafe impl PodInOption for Order {}
+
+impl Order {
+    pub fn new(id: u64, placer: UserAccount, price: u64, quantity: u64, side: Side) -> Self {
+        Self {id, placer, price, quantity, side, _padding: [0u8; 7] }
+    }
+}
+
+#[zero_copy]
 #[repr(C)]
 pub struct OrderQueue {
     pub side: Side,
@@ -54,14 +59,14 @@ pub struct OrderQueue {
     _padding1: [u8; 20], 
     _padding2: [u8; 20], 
     _padding3: [u8; 21], 
-    pub orders: [Order; ORDER_BOOK_DEPTH as usize],
+    pub orders: [Option<Order>; ORDER_BOOK_DEPTH as usize],
     pub free_bitmap: FreeBitmap,
 }
 
 impl OrderQueue {
     pub fn add_order(&mut self, order: Order) -> Option<u8> {
         if let Some(slot) = self.free_bitmap.find_first_zero() {
-            self.orders[slot as usize] = order;
+            self.orders[slot as usize] = Some(order);
             self.free_bitmap.set(slot);
 
             return Some(slot)
@@ -72,16 +77,16 @@ impl OrderQueue {
 
     pub fn remove_order(&mut self, order_id: u64) {
         if let Some(slot) = self.orders.iter().enumerate()
-            .find(|&(_, o)| o.id == order_id)
+            .find(|&(_, o)| o.unwrap().id == order_id)
             .map(|(s, _)| s) {
-                self.orders[slot] = Order::default();
+                self.orders[slot] = Some(Order::default()); // Just so I can always unwrap
                 self.free_bitmap.clear(slot as u8);
             }
     }
 
     pub fn update_order_quantity(&mut self, order_id: u64, new_quantity: u64) -> Result<()> {
-        if let Some(order) = self.orders.iter_mut().find(|o| o.id == order_id) {
-            order.quantity = new_quantity;
+        if let Some(order) = self.orders.iter_mut().find(|o| o.unwrap().id == order_id) {
+            order.unwrap().quantity = new_quantity;
             Ok(())
         } else {
             Err(ErrorCode::CouldNotFind.into())

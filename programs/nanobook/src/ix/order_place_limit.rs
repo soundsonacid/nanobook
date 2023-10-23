@@ -1,16 +1,18 @@
 use anchor_lang::prelude::*;
 use crate::{
     error::ErrorCode,
-    state::{UserAccount, Order, Orderbook, Side, MatchingEngine, Market},
+    state::{UserMap, Order, Orderbook, Side, MatchingEngine, Market},
 };
 
 pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quantity: u64, side: Side, market: Market) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
-    let order = &mut ctx.accounts.order;
+    let usermap = &mut ctx.accounts.usermap.load_mut()?;
+
+    let mut user_account = usermap.load_user(&ctx.accounts.payer.key())?;
 
     match market {
-        Market::SolNano => require!(ctx.accounts.placer.sol_balance >= quantity, ErrorCode::Overdraft),
-        Market::NanoSol => require!(ctx.accounts.placer.nano_balance >= quantity, ErrorCode::Overdraft)
+        Market::SolNano => require!(user_account.sol_balance >= quantity, ErrorCode::Overdraft),
+        Market::NanoSol => require!(user_account.nano_balance >= quantity, ErrorCode::Overdraft)
     };
 
     let mut queue = match side {
@@ -22,18 +24,14 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
 
     book.last_order_id += 1;
 
-    order.id = book.last_order_id;
-    order.placer = *ctx.accounts.placer;
-    order.price = price;
-    order.quantity = quantity;
-    order.side = side;
+    let order = Order::new(book.last_order_id, *user_account, price, quantity, side);
 
-    queue.add_order(**order);
+    queue.add_order(order);
 
     queue.num_orders += 1;
     
     let mut matching_engine = MatchingEngine::new(book);
-    matching_engine.match_limit_order(&order, &mut *ctx.accounts.placer, &market)?;
+    matching_engine.match_limit_order(&order, &mut user_account, &market)?;
 
     Ok(())
 }
@@ -41,23 +39,24 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
 #[derive(Accounts)]
 pub struct PlaceLimitOrder<'info> {
     #[account(
+        mut,
         seeds = [
-            payer.key.as_ref(),
-            b"user",
+            b"usermap"
         ],
-        bump
+        bump,
     )]
-    pub placer: Account<'info, UserAccount>,
+    pub usermap: AccountLoader<'info, UserMap>,
+
 
     #[account(mut)]
     pub book: AccountLoader<'info, Orderbook>,
     
-    #[account(
-        init,
-        payer = payer,
-        space = std::mem::size_of::<Order>() + 8,
-    )]
-    pub order: Account<'info, Order>,
+    // #[account(
+    //     init,
+    //     payer = payer,
+    //     space = std::mem::size_of::<Order>() + 8,
+    // )]
+    // pub order: Account<'info, Order>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

@@ -30,11 +30,11 @@ impl<'a> MatchingEngine<'a> {
         while remaining_quantity > ORDER_DUST_THRESHOLD {
             if let Some(best_quote_idx) = quotes.orders.iter()
                 .enumerate()
-                .filter(|&(_, order)| order.id != 0) // filter out Order::default()
-                .max_by_key(|&(_, order)| order.price)
+                .filter(|&(_, order)| order.unwrap().id != 0 && order.is_some()) // filter out Order::default()
+                .max_by_key(|&(_, order)| order.unwrap().price)
                 .map(|(idx, _)| idx)
             {
-                let best_quote: &mut Order = &mut quotes.orders[best_quote_idx];
+                let best_quote: &mut Order = &mut quotes.orders[best_quote_idx].unwrap();
                 let matched_quantity = min(best_quote.quantity, remaining_quantity);
                 
                 let taker = &mut best_quote.placer;
@@ -87,11 +87,11 @@ impl<'a> MatchingEngine<'a> {
         while remaining_quantity > ORDER_DUST_THRESHOLD {
             if let Some(best_quote_idx) = quotes.orders.iter()
                 .enumerate()
-                .filter(|&(_, order)| order.id != 0) // filter out Order::default()
-                .max_by_key(|&(_, order)| order.price)
+                .filter(|&(_, order)| order.unwrap().id != 0 && order.is_some()) // filter out Order::default()
+                .max_by_key(|&(_, order)| order.unwrap().price)
                 .map(|(idx, _)| idx)
             {
-                let best_quote: &mut Order = &mut quotes.orders[best_quote_idx];
+                let best_quote: &mut Order = &mut quotes.orders[best_quote_idx].unwrap();
                 let matched_quantity = min(best_quote.quantity, remaining_quantity);
                 
                 let maker = &mut best_quote.placer;

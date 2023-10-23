@@ -1,14 +1,16 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{spl_token::native_mint, Token, TokenAccount};
 
-use crate::{state::{UserAccount, user::Balance}, token_utils::token_transfer};
+use crate::{state::{UserMap, user::Balance}, token_utils::token_transfer};
 
 
 pub fn process_deposit(ctx: Context<Deposit>, amt: u64) -> Result<()> {
     token_transfer(amt, &ctx.accounts.token_program, &ctx.accounts.from, &ctx.accounts.to, &ctx.accounts.authority)?;
 
     {
-        let user_account = &mut ctx.accounts.user_account;
+        let usermap = &mut ctx.accounts.usermap.load_mut()?;
+
+        let user_account = usermap.load_user(&ctx.accounts.authority.key())?;
 
         if ctx.accounts.from.mint == native_mint::ID {
             user_account.decrement_balance(&Balance::Sol, amt);
@@ -25,12 +27,11 @@ pub struct Deposit<'info> {
     #[account(
         mut,
         seeds = [
-            authority.key.as_ref(),
-            b"user",
+            b"usermap"
         ],
-        bump
+        bump,
     )]
-    pub user_account: Account<'info, UserAccount>,
+    pub usermap: AccountLoader<'info, UserMap>,
 
     #[account(mut)]
     pub from: Account<'info, TokenAccount>, // payer token account

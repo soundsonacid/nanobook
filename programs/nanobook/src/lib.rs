@@ -18,6 +18,10 @@ pub mod nanobook {
         book_init::process_initialize_orderbook(ctx)
     }
 
+    pub fn initialize_usermap(ctx: Context<InitializeUserMap>) -> Result<()> {
+        usermap_init::process_initialize_usermap(ctx)
+    }
+
     pub fn initialize_user(ctx: Context<InitializeUser>) -> Result<()> {
         user_init::process_initialize_user(ctx)
     }
@@ -38,8 +42,8 @@ pub mod nanobook {
         order_place_market::process_place_market_order(ctx, quantity, side, market)
     }
 
-    pub fn cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
-        order_cancel::process_cancel_order(ctx)
+    pub fn cancel_order(ctx: Context<CancelOrder>, order_id: u64) -> Result<()> {
+        order_cancel::process_cancel_order(ctx, order_id)
     }
 }
 

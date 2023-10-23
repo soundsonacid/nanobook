@@ -5,5 +5,5 @@ pub mod matching_engine;
 
 pub use book::*;
 pub use free_bitmap::FreeBitmap;
-pub use user::UserAccount;
+pub use user::{UserAccount, UserMap};
 pub use matching_engine::{MatchingEngine, Market};

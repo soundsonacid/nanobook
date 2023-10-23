@@ -1,31 +1,26 @@
 use anchor_lang::prelude::*;
-use crate::state::UserAccount;
+use crate::state::user::{UserAccount, UserMap};
 
 pub fn process_initialize_user(ctx: Context<InitializeUser>) -> Result<()> {
-    let user = &mut ctx.accounts.user_account;
-    let bump = ctx.bumps.user_account;
+    let usermap = &mut ctx.accounts.usermap.load_mut()?;
 
-    user.owner = ctx.accounts.payer.key();
-    user.sol_balance = 0;
-    user.nano_balance = 0;
-    user.bump = bump;
+    let user_account = UserAccount::new(ctx.accounts.payer.key());
 
+    usermap.add_user(user_account)?;
+    
     Ok(())
 }
 
 #[derive(Accounts)]
 pub struct InitializeUser<'info> {
     #[account(
-        init,
-        payer = payer,
+        mut,
         seeds = [
-            payer.key.as_ref(),
-            b"user",
+            b"usermap"
         ],
         bump,
-        space = std::mem::size_of::<UserAccount>() + 8,
     )]
-    pub user_account: Account<'info, UserAccount>,
+    pub usermap: AccountLoader<'info, UserMap>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

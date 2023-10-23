@@ -12,4 +12,10 @@ pub enum ErrorCode {
     CouldNotFind,
     #[msg("Attempted to withdraw more than balance")]
     Overdraft,
+    #[msg("User map full")]
+    UserMapFull,
+    #[msg("User not found")]
+    UserNotFound,
+    #[msg("User already exists")]
+    UserAlreadyExists,
 }

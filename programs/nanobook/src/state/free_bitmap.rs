@@ -1,6 +1,7 @@
+use anchor_lang::prelude::*;
 use bytemuck::{Zeroable, Pod};
 
-#[derive(Debug, Copy, Clone, Zeroable, Pod)]
+#[derive(Debug, Copy, Clone, Zeroable, Pod, AnchorSerialize, AnchorDeserialize)]
 #[repr(C)]
 pub struct FreeBitmap {
     bits: u64, 

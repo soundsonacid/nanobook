@@ -3,7 +3,7 @@ use anchor_spl::{associated_token::AssociatedToken, token::{TokenAccount, Mint, 
 use crate::{state::Orderbook, constants::ORDER_BOOK_DEPTH};
 
 pub fn process_initialize_orderbook(ctx: Context<InitializeOrderbook>) -> Result<()> {
-    let book = &mut ctx.accounts.book.load_mut()?;
+    let book = &mut ctx.accounts.book.load_init()?;
     let bump = ctx.bumps.book;
     book.buy_queue.max_orders = ORDER_BOOK_DEPTH;
     book.sell_queue.max_orders = ORDER_BOOK_DEPTH;
@@ -22,7 +22,7 @@ pub struct InitializeOrderbook<'info> {
             b"orderbook"
         ],
         bump,
-        space = std::mem::size_of::<Orderbook>() + 8,
+        space = 165120 + 8,
     )]
     pub book: AccountLoader<'info, Orderbook>,
 

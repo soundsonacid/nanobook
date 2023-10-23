@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{spl_token::native_mint, Token, TokenAccount};
 
-use crate::{state::{UserAccount, user::Balance, Orderbook}, token_utils::token_transfer_signed, error::ErrorCode};
+use crate::{state::{UserMap, user::Balance, Orderbook}, token_utils::token_transfer_signed, error::ErrorCode};
 
 
 pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
@@ -11,17 +11,21 @@ pub fn process_withdrawal(ctx: Context<Withdraw>, amt: u64) -> Result<()> {
     ];
     let signer_seeds = &seeds[..];
 
+    let usermap = &mut ctx.accounts.usermap.load_mut()?;
+
+    let user_account = usermap.load_user(&ctx.accounts.payer.key())?;
+
     // Enforce against over-withdrawals
     if ctx.accounts.from.mint == native_mint::ID {
-        require!(ctx.accounts.user.sol_balance >= amt, ErrorCode::Overdraft);
+        require!(user_account.sol_balance >= amt, ErrorCode::Overdraft);
     } else {
-        require!(ctx.accounts.user.nano_balance >= amt, ErrorCode::Overdraft);
+        require!(user_account.nano_balance >= amt, ErrorCode::Overdraft);
     }
 
     token_transfer_signed(amt, &ctx.accounts.token_program, &ctx.accounts.to, &ctx.accounts.from, &ctx.accounts.orderbook, signer_seeds)?;
 
     {
-        let user_account = &mut ctx.accounts.user;
+        let user_account = usermap.load_user(&ctx.accounts.payer.key())?;
 
         if ctx.accounts.from.mint == native_mint::ID {
             user_account.decrement_balance(&Balance::Sol, amt)
@@ -38,12 +42,11 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         seeds = [
-            payer.key.as_ref(),
-            b"user",
+            b"usermap"
         ],
-        bump
+        bump,
     )]
-    pub user: Account<'info, UserAccount>,
+    pub usermap: AccountLoader<'info, UserMap>,
 
     #[account(
         mut,
