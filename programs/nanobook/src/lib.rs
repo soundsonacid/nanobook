@@ -42,8 +42,8 @@ pub mod nanobook {
         order_place_market::process_place_market_order(ctx, quantity, side, market)
     }
 
-    pub fn cancel_order(ctx: Context<CancelOrder>, order_id: u64) -> Result<()> {
-        order_cancel::process_cancel_order(ctx, order_id)
+    pub fn cancel_order(ctx: Context<CancelOrder>, order_id: u64, side: Side) -> Result<()> {
+        order_cancel::process_cancel_order(ctx, order_id, side)
     }
 }
 

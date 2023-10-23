@@ -1,23 +1,17 @@
 use anchor_lang::prelude::*;
-use crate::{
-    error::ErrorCode,
-    state::{UserMap, Order, Orderbook, Side},
-};
+use crate::state::{UserMap, Orderbook, Side};
 
-pub fn process_cancel_order(ctx: Context<CancelOrder>, order_id: u64) -> Result<()> {
+pub fn process_cancel_order(ctx: Context<CancelOrder>, order_id: u64, side: Side) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
 
+    let mut queue = match side {
+        Side::Buy => book.buy_queue,
+        Side::Sell => book.sell_queue
+    };
 
-    // require!(order.placer == *ctx.accounts.placer, ErrorCode::CouldNotCancel);
+    queue.remove_order(order_id);
 
-    // let mut queue = match order.side {
-    //     Side::Buy => book.buy_queue,
-    //     Side::Sell => book.sell_queue
-    // };
-
-    // queue.num_orders -= 1;
-
-    // queue.remove_order(order.id);
+    queue.num_orders -= 1;
     
     Ok(())
 }
