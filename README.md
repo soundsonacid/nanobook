@@ -4,6 +4,10 @@ this is the second project in my budding series of ultra-minimal barebones block
 
 it is a 100% on-chain CLOB that will be as small as i could possibly make it to still resemble what a CLOB is supposed to do
 
+nanobook only supports two markets total - SOL/ANY and ANY/SOL 
+
+because i am writing tests for this with a token i decided to call "NANO", the markets & balances are denoted with Nano in several places for clarity
+
 a few implementation decisions (128-order limit, FreeBitmap, token_utils) came from metaproph3t and https://github.com/metaDAOproject/YALOB
 
 obviously this is NOT be intended for production usage and is more just for fun & to learn about CLOB architecture
