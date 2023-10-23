@@ -78,13 +78,6 @@ impl OrderQueue {
             }
     }
 
-    pub fn get_best_quote(&mut self) -> Option<&mut Order> {
-        self.orders
-            .iter_mut()
-            .filter(|order| order.id != 0) // filter out Order::default()
-            .max_by_key(|order| order.price)
-    }
-
     pub fn update_order_quantity(&mut self, order_id: u64, new_quantity: u64) -> Result<()> {
         if let Some(order) = self.orders.iter_mut().find(|o| o.id == order_id) {
             order.quantity = new_quantity;
