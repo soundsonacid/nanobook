@@ -11,12 +11,15 @@ pub fn process_cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
     require!(order.placer == *ctx.accounts.placer, ErrorCode::CouldNotCancel);
 
     order.close(ctx.accounts.payer.to_account_info())?;
-    book.num_orders -= 1;
 
-    match order.side {
-        Side::Buy => book.buy_queue.remove_order(order.id),
-        Side::Sell => book.sell_queue.remove_order(order.id),
+    let mut queue = match order.side {
+        Side::Buy => book.buy_queue,
+        Side::Sell => book.sell_queue
     };
+
+    queue.num_orders -= 1;
+
+    queue.remove_order(order.id);
     
     Ok(())
 }

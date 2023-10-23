@@ -8,7 +8,12 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
     let book = &mut ctx.accounts.book.load_mut()?;
     let order = &mut ctx.accounts.order;
 
-    if book.num_orders >= book.max_orders {
+    let mut queue = match side {
+        Side::Buy => book.buy_queue,
+        Side::Sell => book.sell_queue
+    };
+
+    if queue.num_orders >= queue.max_orders {
         return Err(ErrorCode::MaxOrdersReached.into());
     }
 
@@ -20,12 +25,9 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
     order.quantity = quantity;
     order.side = side;
 
-    match side {
-        Side::Buy => book.buy_queue.add_order(**order),
-        Side::Sell => book.sell_queue.add_order(**order),
-    };
+    queue.add_order(**order);
 
-    book.num_orders += 1;
+    queue.num_orders += 1;
     
     let mut matching_engine = MatchingEngine::new(book);
     matching_engine.match_limit_order(&order, &mut *ctx.accounts.placer, &market)?;

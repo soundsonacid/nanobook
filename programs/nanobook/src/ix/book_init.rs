@@ -5,8 +5,10 @@ use crate::{state::Orderbook, constants::ORDER_BOOK_DEPTH};
 pub fn process_initialize_orderbook(ctx: Context<InitializeOrderbook>) -> Result<()> {
     let book = &mut ctx.accounts.book.load_mut()?;
     let bump = ctx.bumps.book;
-    book.max_orders = ORDER_BOOK_DEPTH;
-    book.num_orders = 0;
+    book.buy_queue.max_orders = ORDER_BOOK_DEPTH;
+    book.sell_queue.max_orders = ORDER_BOOK_DEPTH;
+    book.buy_queue.num_orders = 0;
+    book.sell_queue.num_orders = 0;
     book.bump = bump;
     Ok(())
 }

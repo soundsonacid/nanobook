@@ -22,10 +22,8 @@ unsafe impl Pod for Side {}
 #[account(zero_copy)]
 #[repr(C)]
 pub struct Orderbook {
-    pub max_orders: u8,
-    pub num_orders: u8,
     pub bump: u8,
-    _padding: [u8; 5],
+    _padding: [u8; 7],
     pub last_order_id: u64,
     pub buy_queue: OrderQueue,
     pub sell_queue: OrderQueue,
@@ -51,8 +49,10 @@ pub struct Order {
 #[repr(C)]
 pub struct OrderQueue {
     pub side: Side,
-    _padding1: [u8; 21], 
-    _padding2: [u8; 21], 
+    pub num_orders: u8,
+    pub max_orders: u8,
+    _padding1: [u8; 20], 
+    _padding2: [u8; 20], 
     _padding3: [u8; 21], 
     pub orders: [Order; ORDER_BOOK_DEPTH as usize],
     pub free_bitmap: FreeBitmap,
