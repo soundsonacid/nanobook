@@ -8,6 +8,11 @@ pub fn process_place_limit_order(ctx: Context<PlaceLimitOrder>, price: u64, quan
     let book = &mut ctx.accounts.book.load_mut()?;
     let order = &mut ctx.accounts.order;
 
+    match market {
+        Market::SolNano => require!(ctx.accounts.placer.sol_balance >= quantity, ErrorCode::Overdraft),
+        Market::NanoSol => require!(ctx.accounts.placer.nano_balance >= quantity, ErrorCode::Overdraft)
+    };
+
     let mut queue = match side {
         Side::Buy => book.buy_queue,
         Side::Sell => book.sell_queue
